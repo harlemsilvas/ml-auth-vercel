@@ -1,12 +1,20 @@
 // pages/api/auth/callback.js
 import fetch from "node-fetch";
 
-// Função para testar se o domínio é acessível
+// Função para testar conectividade com timeout
 async function testDNS() {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
-    const response = await fetch("https://httpbin.org/get", { timeout: 5000 });
+    const response = await fetch("https://httpbin.org/get", {
+      method: "GET",
+      signal: controller.signal,
+    });
+    clearTimeout(timeoutId);
     return response.ok;
   } catch (err) {
+    clearTimeout(timeoutId);
     console.error("Falha no teste de rede:", err.message);
     return false;
   }
@@ -15,9 +23,9 @@ async function testDNS() {
 export default async function handler(req, res) {
   const isNetworkOk = await testDNS();
   if (!isNetworkOk) {
-    return res
-      .status(500)
-      .json({ error: "Falha de rede: DNS ou conectividade" });
+    return res.status(500).json({
+      error: "Falha de rede: DNS ou conectividade",
+    });
   }
 
   const { code, state } = req.query;
@@ -38,18 +46,24 @@ export default async function handler(req, res) {
     params.append("code", code);
     params.append("redirect_uri", redirectUri);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s
+
     const response = await fetch(tokenUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params,
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await response.json();
 
     if (!response.ok) {
-      return res
-        .status(400)
-        .json({ error: "Falha ao obter token", details: data });
+      return res.status(400).json({
+        error: "Falha ao obter token",
+        details: data,
+      });
     }
 
     // Salva no cookie (seguro)
@@ -61,6 +75,10 @@ export default async function handler(req, res) {
 
     res.redirect("/");
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("[Erro no callback]", error);
+    res.status(500).json({
+      error: "Erro interno ao processar autenticação",
+      message: error.message,
+    });
   }
 }
