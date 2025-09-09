@@ -11,7 +11,7 @@ export default function handler(req, res) {
   );
 
   const authUrl =
-    `https://auth.mercadolibre.com.br/authorization?` +
+    `https://auth.mercadolivre.com.br/authorization?` +
     `response_type=code&` +
     `client_id=${clientId}&` +
     `redirect_uri=${encodeURIComponent(redirectUri)}&` +
