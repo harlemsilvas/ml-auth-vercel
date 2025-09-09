@@ -1,7 +1,25 @@
 // pages/api/auth/callback.js
 import fetch from "node-fetch";
 
+// Função para testar se o domínio é acessível
+async function testDNS() {
+  try {
+    const response = await fetch("https://httpbin.org/get", { timeout: 5000 });
+    return response.ok;
+  } catch (err) {
+    console.error("Falha no teste de rede:", err.message);
+    return false;
+  }
+}
+
 export default async function handler(req, res) {
+  const isNetworkOk = await testDNS();
+  if (!isNetworkOk) {
+    return res
+      .status(500)
+      .json({ error: "Falha de rede: DNS ou conectividade" });
+  }
+
   const { code, state } = req.query;
   const savedState = req.cookies?.auth_state;
 
