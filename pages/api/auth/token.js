@@ -1,6 +1,6 @@
 // pages/api/auth/token.js
-import dbConnect from "../../lib/mongodb";
-import Token from "../../models/Token";
+import dbConnect from "../../../lib/mongodb";
+import Token from "../../../models/Token";
 
 export default async function handler(req, res) {
   await dbConnect();
