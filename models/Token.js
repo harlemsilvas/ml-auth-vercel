@@ -2,10 +2,10 @@
 import mongoose from "mongoose";
 
 const tokenSchema = new mongoose.Schema({
-  access_token: String,
-  refresh_token: String,
-  user_id: Number,
-  expires_in: Number,
+  access_token: { type: String, required: true },
+  refresh_token: { type: String, required: true },
+  user_id: { type: Number, required: true },
+  expires_in: { type: Number, default: 21600 },
   created_at: { type: Date, default: Date.now },
 });
 
