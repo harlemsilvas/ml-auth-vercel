@@ -2,6 +2,7 @@
   "name": "ml-auth-vercel",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "build": "next build",
     "start": "next start"

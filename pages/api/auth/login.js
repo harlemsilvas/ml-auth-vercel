@@ -1,7 +1,8 @@
 // pages/api/auth/login.js
 export default function handler(req, res) {
   const clientId = process.env.CLIENT_ID;
-  const redirectUri = `https://${req.headers.host}/api/auth/callback`;
+  // const redirectUri = `https://${req.headers.host}/api/auth/callback`;
+  const redirectUri = `https://www.youtube.com/`;
   const state = Math.random().toString(36).substring(7);
 
   // Salva state no cookie
