@@ -1,5 +1,5 @@
 // pages/api/zpl.js
-import { getValidToken } from "../../services/token-manager";
+import { getValidToken } from "@/services/token-manager";
 
 export default async function handler(req, res) {
   const { shipment_id } = req.query;
