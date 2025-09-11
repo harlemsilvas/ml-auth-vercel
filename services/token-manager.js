@@ -4,6 +4,16 @@ import dbConnect from "../lib/mongodb";
 import Token from "../models/Token";
 
 /**
+ * Retorna todos os vendedores conectados
+ */
+export async function getAllSellers() {
+  await dbConnect();
+  return await Token.find({}, "user_id created_at").sort({ created_at: -1 });
+}
+
+console.log("Função getAllSellers carregada");
+
+/**
  * Função principal: troca code por token e salva no banco
  */
 export async function exchangeCodeForToken(code, redirectUri) {
