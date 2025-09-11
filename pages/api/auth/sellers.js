@@ -1,5 +1,5 @@
 // pages/api/auth/sellers.js
-import { getAllSellers } from "../../services/token-manager";
+import { getAllSellers } from "../../../services/token-manager";
 
 export default async function handler(req, res) {
   try {
