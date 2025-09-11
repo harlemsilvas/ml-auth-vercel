@@ -11,7 +11,7 @@ export async function updateMercadoLivreRefreshToken() {
 
   try {
     const response = await axios.post(
-      "https://api.mercadolibre.com/oauth/token",
+      "https://api.mercadolivre.com/oauth/token",
       {
         grant_type: "refresh_token",
         client_id: process.env.MERCADO_LIVRE_APP_ID,
