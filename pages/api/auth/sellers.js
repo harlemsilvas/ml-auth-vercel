@@ -1,6 +1,6 @@
 // pages/api/auth/sellers.js
 // Atualizado em: ${new Date().toISOString()} ← isso só para forçar mudança
-import { getAllSellers } from "../../../services/token-manager";
+import { getAllSellers } from "@/services/token-manager";
 
 export default async function handler(req, res) {
   try {

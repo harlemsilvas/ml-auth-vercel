@@ -1,5 +1,5 @@
 // services/shipping.js
-import { getValidToken } from "./token-manager";
+import { getValidToken } from "@/services/token-manager";
 
 /**
  * Baixa o código ZPL de uma etiqueta de envio

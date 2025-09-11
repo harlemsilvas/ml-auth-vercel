@@ -1,5 +1,5 @@
 // pages/api/auth/callback.js
-import { exchangeCodeForToken } from "../../services/token-manager";
+import { exchangeCodeForToken } from "@/services/token-manager";
 
 export default async function handler(req, res) {
   const { code, state } = req.query;

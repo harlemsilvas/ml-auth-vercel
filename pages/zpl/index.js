@@ -1,6 +1,7 @@
 // pages/zpl/index.js
 import { useState } from "react";
-import Layout from "../../components/Layout";
+import Layout from "@/components/Layout";
+import { getLabelaryUrl } from "@/utils/labelary";
 
 export default function ZPLPage() {
   const [shipmentId, setShipmentId] = useState("");
@@ -30,10 +31,10 @@ export default function ZPLPage() {
     }
   };
 
-  const getLabelaryUrl = (zplCode) => {
-    const encoded = encodeURIComponent(zplCode.trim());
-    return `https://www.labelary.com/viewer.html?p=1&d=8&s=2&w=4&h=6&f=hex&file=${encoded}`;
-  };
+  // const getLabelaryUrl = (zplCode) => {
+  //   const encoded = encodeURIComponent(zplCode.trim());
+  //   return `https://www.labelary.com/viewer.html?p=1&d=8&s=2&w=4&h=6&f=hex&file=${encoded}`;
+  // };
 
   return (
     <Layout>

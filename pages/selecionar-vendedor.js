@@ -1,6 +1,6 @@
 // pages/selecionar-vendedor.js
 import { useEffect, useState } from "react";
-import Layout from "../components/Layout";
+import Layout from "@/components/Layout";
 
 export default function SelecionarVendedor() {
   const [sellers, setSellers] = useState([]);
