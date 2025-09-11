@@ -1,94 +1,99 @@
 // pages/zpl/index.js
-import { useState } from "react";
-import Layout from "@/components/Layout";
-import { getLabelaryUrl } from "@/utils/labelary";
+import { useEffect, useState } from "react";
+import Layout from "../../components/Layout";
 
 export default function ZPLPage() {
-  const [shipmentId, setShipmentId] = useState("");
   const [zpl, setZpl] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [shipmentId, setShipmentId] = useState("");
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const handleDownload = async () => {
-    if (!shipmentId) return;
-    setLoading(true);
-    setError("");
-    setZpl("");
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const id = urlParams.get("shipment_id");
+    if (!id) {
+      setError("Shipment ID não fornecido.");
+      setLoading(false);
+      return;
+    }
 
+    setShipmentId(id);
+    fetchZPL(id);
+  }, []);
+
+  const fetchZPL = async (id) => {
     try {
-      const res = await fetch(`/api/zpl?shipment_id=${shipmentId}`);
+      const res = await fetch(`/api/zpl?shipment_id=${id}`);
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && data.zpl) {
         setZpl(data.zpl);
       } else {
-        setError(data.error);
+        setError(data.error || "Falha ao baixar ZPL");
       }
     } catch (err) {
-      setError("Falha ao conectar ao servidor");
+      setError("Erro de conexão com o servidor");
     } finally {
       setLoading(false);
     }
   };
 
-  // const getLabelaryUrl = (zplCode) => {
-  //   const encoded = encodeURIComponent(zplCode.trim());
-  //   return `https://www.labelary.com/viewer.html?p=1&d=8&s=2&w=4&h=6&f=hex&file=${encoded}`;
-  // };
+  const getLabelaryUrl = () => {
+    const encodedZpl = encodeURIComponent(zpl.trim());
+    return `https://www.labelary.com/viewer.html?p=1&d=8&s=2&w=4&h=6&f=hex&file=${encodedZpl}`;
+  };
+
+  if (loading)
+    return (
+      <Layout>
+        <p>Carregando etiqueta...</p>
+      </Layout>
+    );
+  if (error)
+    return (
+      <Layout>
+        <p style={{ color: "red" }}>❌ {error}</p>
+      </Layout>
+    );
 
   return (
     <Layout>
-      <h1>🖨️ Impressão de Etiquetas ZPL</h1>
+      <h1>🖨️ Prévia da Etiqueta ZPL</h1>
+      <p>
+        <strong>Shipment ID:</strong> {shipmentId}
+      </p>
 
-      <div style={{ marginBottom: "20px" }}>
-        <input
-          type="text"
-          placeholder="Ex: 1234567890"
-          value={shipmentId}
-          onChange={(e) => setShipmentId(e.target.value)}
-          style={{ padding: "10px", fontSize: "16px", width: "300px" }}
-        />
-        <button
-          onClick={handleDownload}
-          disabled={loading}
-          style={{
-            marginLeft: "10px",
-            padding: "10px 20px",
-            fontSize: "16px",
-            backgroundColor: "#0070ba",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-          }}
-        >
-          {loading ? "Baixando..." : "Baixar ZPL"}
-        </button>
+      <a
+        href={getLabelaryUrl()}
+        target="_blank"
+        rel="noreferrer"
+        style={{
+          display: "inline-block",
+          padding: "12px 24px",
+          backgroundColor: "#28a745",
+          color: "white",
+          textDecoration: "none",
+          borderRadius: "4px",
+          fontWeight: "bold",
+          marginTop: "20px",
+        }}
+      >
+        👁️ Ver Prévia no Labelary
+      </a>
+
+      <div
+        style={{
+          marginTop: "30px",
+          whiteSpace: "pre-wrap",
+          fontFamily: "monospace",
+          fontSize: "12px",
+          background: "#f5f5f5",
+          padding: "10px",
+          borderRadius: "4px",
+        }}
+      >
+        {zpl}
       </div>
-
-      {error && <p style={{ color: "red" }}>❌ {error}</p>}
-
-      {zpl && (
-        <div>
-          <h3>✅ Etiqueta carregada!</h3>
-          <a
-            href={getLabelaryUrl(zpl)}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              display: "inline-block",
-              padding: "10px 20px",
-              backgroundColor: "#28a745",
-              color: "white",
-              textDecoration: "none",
-              borderRadius: "4px",
-              marginTop: "10px",
-            }}
-          >
-            👁️ Ver Prévia no Labelary
-          </a>
-        </div>
-      )}
     </Layout>
   );
 }
