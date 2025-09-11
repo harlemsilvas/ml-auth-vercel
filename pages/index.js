@@ -1,9 +1,10 @@
 // pages/index.js
 import { useEffect, useState } from "react";
+import Layout from "../components/Layout";
 
 export default function Home() {
   const [tokenInfo, setTokenInfo] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTokenStatus();
@@ -11,70 +12,52 @@ export default function Home() {
 
   const fetchTokenStatus = async () => {
     try {
-      const res = await fetch("/api/auth/token");
+      const res = await fetch("/api/auth/current-token");
       const data = await res.json();
       setTokenInfo(data);
     } catch (err) {
       setTokenInfo({ error: "Falha ao carregar token" });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogin = () => {
-    setLoading(true);
-    window.location.href = "/api/auth/login";
-  };
-
   return (
-    <div style={{ padding: "40px", fontFamily: "Arial, sans-serif" }}>
-      <h1>🔐 Autenticação Mercado Livre</h1>
+    <Layout>
+      <h1>🔐 Painel de Autenticação ML</h1>
 
-      {tokenInfo?.error && <p style={{ color: "red" }}>❌ {tokenInfo.error}</p>}
-
-      {tokenInfo?.access_token ? (
+      {loading ? (
+        <p>Carregando...</p>
+      ) : tokenInfo?.error ? (
         <div>
-          <p>✅ Autenticado com sucesso!</p>
-          <p>
-            <strong>User ID:</strong> {tokenInfo.user_id}
-          </p>
-          <p>
-            <strong>Expira em:</strong>{" "}
-            {new Date(
-              Date.now() + tokenInfo.expires_in * 1000
-            ).toLocaleTimeString()}
-          </p>
-          <button onClick={fetchTokenStatus} disabled={loading}>
-            Atualizar
+          <p style={{ color: "red" }}>❌ {tokenInfo.error}</p>
+          <button onClick={() => (window.location.href = "/api/auth/login")}>
+            Conectar ao Mercado Livre
           </button>
         </div>
       ) : (
         <div>
+          <p>✅ Conectado como vendedor</p>
           <p>
-            🔒 Não autenticado. Conecte-se para acessar a API do Mercado Livre.
+            <strong>User ID:</strong> {tokenInfo.user_id}
           </p>
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            style={{
-              padding: "10px 20px",
-              fontSize: "16px",
-              backgroundColor: "#fff",
-              color: "#2C2C2C",
-              border: "1px solid #ddd",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
-            {loading ? "Redirecionando..." : "Conectar ao Mercado Livre"}
-          </button>
+          <p>
+            <strong>Token válido por:</strong>{" "}
+            {Math.floor(tokenInfo.expires_in / 60)} minutos
+          </p>
         </div>
       )}
 
       <hr style={{ margin: "40px 0" }} />
-      <h3>Informações do App</h3>
-      <p>
-        <strong>Status:</strong>{" "}
-        {tokenInfo?.access_token ? "✅ Conectado" : "❌ Desconectado"}
-      </p>
-    </div>
+      <h3>Próximos passos</h3>
+      <ul>
+        <li>
+          <a href="/zpl">🖨️ Baixar etiquetas ZPL</a>
+        </li>
+        <li>
+          <a href="/pedidos">📦 Ver pedidos recentes</a>
+        </li>
+      </ul>
+    </Layout>
   );
 }
