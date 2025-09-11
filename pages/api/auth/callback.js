@@ -1,6 +1,21 @@
 // pages/api/auth/callback.js
 import fetch from "node-fetch";
 
+async function fetchWithRetry(url, options, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, options);
+      return response;
+    } catch (error) {
+      if (i === retries - 1) throw error; // Lança erro na última tentativa
+      console.log(
+        `🔁 Tentativa ${i + 1} falhou, esperando ${1000 * (i + 1)}ms...`
+      );
+      await new Promise((resolve) => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
+
 // Necessário para Vercel (Node 18+)
 if (!globalThis.fetch) {
   globalThis.fetch = fetch;
@@ -25,7 +40,8 @@ export default async function handler(req, res) {
     params.append("code", code);
     params.append("redirect_uri", redirectUri);
 
-    const response = await fetch(tokenUrl, {
+    // const response = await fetch(tokenUrl, {
+    const response = await fetchWithRetry(tokenUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: params,

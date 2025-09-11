@@ -1,4 +1,12 @@
-node_modules/
-.env.local
-.vercel
+# Next.js
 .next
+.out
+build
+
+# Ambiente
+.env.local
+node_modules/
+
+# Sistema
+.DS_Store
+Thumbs.db
