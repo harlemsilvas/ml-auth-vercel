@@ -9,12 +9,7 @@ export async function fetchSellerOrders(sellerId, limit = 10) {
     headers: { Authorization: `Bearer ${token.access_token}` },
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Falha ao buscar pedidos: ${response.status} - ${errorText}`
-    );
-  }
+  if (!response.ok) throw new Error("Falha ao buscar pedidos");
 
   const data = await response.json();
 
@@ -24,7 +19,7 @@ export async function fetchSellerOrders(sellerId, limit = 10) {
     date_created: order.date_created,
     total_amount: order.total_amount,
     buyer: order.buyer.nickname,
-    shipment_id: order.shipping?.id || null,
-    shipping_status: order.shipping?.status,
+    shipping: order.shipping || null, // ← Garante que sempre há um objeto shipping
+    // shipment_id: order.shipping?.id → NÃO USE ISSO NO FRONTEND
   }));
 }
