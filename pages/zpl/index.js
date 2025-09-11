@@ -1,6 +1,7 @@
 // pages/zpl/index.js
 import { useEffect, useState } from "react";
-import Layout from "../../components/Layout";
+import Layout from "@/components/Layout";
+// import { getLabelaryUrl } from "@/utils/labelary";
 
 export default function ZPLPage() {
   const [zpl, setZpl] = useState("");
