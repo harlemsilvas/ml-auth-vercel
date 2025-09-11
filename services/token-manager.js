@@ -4,9 +4,9 @@ import dbConnect from "../lib/mongodb";
 import Token from "../models/Token";
 
 /**
- * Salva ou atualiza o token de um vendedor
+ * Função principal: troca code por token e salva no banco
  */
-export async function saveTokenFromCode(code, redirectUri) {
+export async function exchangeCodeForToken(code, redirectUri) {
   await dbConnect();
 
   try {
@@ -17,40 +17,43 @@ export async function saveTokenFromCode(code, redirectUri) {
         grant_type: "authorization_code",
         client_id: process.env.CLIENT_ID,
         client_secret: process.env.CLIENT_SECRET,
-        code,
+        code: code,
         redirect_uri: redirectUri,
       }),
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(`Falha na API: ${data.error}`);
 
-    // Atualiza ou cria novo token
-    const token = await Token.findOneAndUpdate(
-      { user_id: data.user_id },
-      {
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        expires_in: data.expires_in,
-      },
-      { upsert: true, new: true }
-    );
+    if (!response.ok) {
+      throw new Error(`Falha na API: ${data.error} - ${data.message}`);
+    }
 
-    console.log("[Token] Salvo para vendedor:", data.user_id);
-    return token;
+    // Salva no banco
+    const newToken = await Token.create({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      user_id: data.user_id,
+      expires_in: data.expires_in,
+    });
+
+    console.log("[Token] Novo token salvo para user_id:", data.user_id);
+    return newToken;
   } catch (error) {
-    console.error("[Erro ao salvar token]", error.message);
+    console.error("[Erro ao trocar code por token]", error.message);
     throw error;
   }
 }
 
 /**
- * Renova o token de um vendedor específico
+ * Renova o token usando o refresh_token mais recente
  */
-export async function refreshAccessToken(user_id) {
+export async function refreshAccessToken() {
   await dbConnect();
-  const token = await Token.findOne({ user_id });
-  if (!token) throw new Error("Vendedor não encontrado");
+
+  const latestToken = await Token.findOne().sort({ created_at: -1 }).exec();
+  if (!latestToken) {
+    throw new Error("Nenhum token encontrado para renovar");
+  }
 
   try {
     const response = await fetch("https://api.mercadolibre.com/oauth/token", {
@@ -60,55 +63,51 @@ export async function refreshAccessToken(user_id) {
         grant_type: "refresh_token",
         client_id: process.env.CLIENT_ID,
         client_secret: process.env.CLIENT_SECRET,
-        refresh_token: token.refresh_token,
+        refresh_token: latestToken.refresh_token,
       }),
     });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(`Falha ao renovar: ${data.error}`);
 
-    const updated = await Token.findOneAndUpdate(
-      { user_id },
-      {
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        expires_in: data.expires_in,
-      },
-      { new: true }
-    );
+    if (!response.ok) {
+      throw new Error(`Falha ao renovar: ${data.error} - ${data.message}`);
+    }
 
-    console.log("[Token] Renovado para vendedor:", user_id);
-    return updated;
+    const renewedToken = await Token.create({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      user_id: data.user_id,
+      expires_in: data.expires_in,
+    });
+
+    console.log("[Token] Renovado com sucesso para user_id:", data.user_id);
+    return renewedToken;
   } catch (error) {
-    console.error("[Erro ao renovar]", error.message);
+    console.error("[Erro ao renovar token]", error.message);
     throw error;
   }
 }
 
 /**
- * Obtém token válido para um vendedor
+ * Obtém o token válido atual (renova se necessário)
  */
-export async function getValidToken(user_id) {
+export async function getValidToken() {
   await dbConnect();
-  let token = await Token.findOne({ user_id });
-  if (!token) throw new Error("Nenhum token registrado para este vendedor");
+
+  let token = await Token.findOne().sort({ created_at: -1 }).exec();
+  if (!token) {
+    throw new Error("Nenhum token registrado. Inicie o fluxo OAuth.");
+  }
 
   const now = Date.now();
-  const tokenAge = now - token.created_at.getTime();
+  const tokenAge = now - new Date(token.created_at).getTime();
   const expiresInMs = token.expires_in * 1000;
 
   if (tokenAge > expiresInMs - 60000) {
-    console.log(`[Token] Renovando para vendedor ${user_id}`);
-    token = await refreshAccessToken(user_id);
+    // Renova 1 min antes
+    console.log("[Token] Próximo de expirar. Renovando...");
+    token = await refreshAccessToken();
   }
 
   return token;
-}
-
-/**
- * Lista todos os vendedores conectados
- */
-export async function getAllSellers() {
-  await dbConnect();
-  return await Token.find({}, "user_id created_at").sort({ created_at: -1 });
 }
