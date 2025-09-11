@@ -8,15 +8,18 @@ export default function PedidosPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  // Carregar vendedores conectados
   useEffect(() => {
     fetch("/api/auth/sellers")
       .then((r) => r.json())
       .then((data) => {
         setSellers(data);
         if (data.length > 0) setSelectedSeller(data[0].user_id);
-      });
+      })
+      .catch((err) => console.error(err));
   }, []);
 
+  // Carregar pedidos do vendedor selecionado
   useEffect(() => {
     if (selectedSeller) loadOrders();
   }, [selectedSeller]);
@@ -30,7 +33,7 @@ export default function PedidosPage() {
       const data = await res.json();
       setOrders(data.orders || []);
     } catch (err) {
-      console.error(err);
+      console.error("Erro ao carregar pedidos", err);
     } finally {
       setLoading(false);
     }
@@ -76,26 +79,11 @@ export default function PedidosPage() {
                 <strong>Status:</strong> {order.status} <br />
                 <strong>Data:</strong>{" "}
                 {new Date(order.date_created).toLocaleString()} <br />
-                <strong>Total:</strong> R$ {order.total_amount} <br />
+                <strong>Total:</strong> R$ {order.total_amount?.toFixed(2)}{" "}
+                <br />
                 <strong>Comprador:</strong> {order.buyer.nickname} <br />
-                <strong>Shipment ID:</strong> {order.shipping.id}
-                {order.shipment_id && (
-                  <a
-                    href={`/zpl?shipment_id=${order.shipment_id}`}
-                    target="_blank"
-                    style={{
-                      marginLeft: "10px",
-                      padding: "5px 10px",
-                      backgroundColor: "#0070ba",
-                      color: "white",
-                      textDecoration: "none",
-                      borderRadius: "4px",
-                      fontSize: "12px",
-                    }}
-                  >
-                    🖨️ Imprimir
-                  </a>
-                )}
+                <strong>Shipment ID:</strong>{" "}
+                {order.shipping?.id || "Não disponível"}
               </li>
             ))
           )}
