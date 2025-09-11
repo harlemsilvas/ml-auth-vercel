@@ -1,5 +1,5 @@
 // pages/api/auth/current-token.js
-import { getValidToken } from "../../services/token-manager";
+import { getValidToken } from "../../../services/token-manager";
 
 export default async function handler(req, res) {
   try {
