@@ -21,6 +21,12 @@ export default function Layout({ children }) {
           <Link href="/pedidos" style={linkStyle}>
             📦 Pedidos
           </Link>
+          <a
+            href="/api/auth/login"
+            style={{ ...linkStyle, marginLeft: "auto" }}
+          >
+            ➕ Conectar Vendedor
+          </a>
         </div>
       </nav>
 
