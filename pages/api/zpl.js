@@ -1,5 +1,5 @@
 // pages/api/zpl.js
-import { downloadZPL } from "@/services/shipping";
+import { getValidToken } from "../../services/token-manager";
 
 export default async function handler(req, res) {
   const { shipment_id } = req.query;
@@ -9,10 +9,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    const zpl = await downloadZPL(shipment_id);
-    res.status(200).json({ zpl, filename: `etiqueta_${shipment_id}.zpl` });
+    // Obter token válido
+    const sellerId = parseInt(req.cookies.ml_user_id); // ou passe por query
+    const token = await getValidToken(sellerId);
+
+    // Montar URL completa
+    const url = `https://api.mercadolibre.com/shipment_labels?shipment_ids=${shipment_id}&response_type=zpl2&access_token=${token.access_token}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/vnd.mercadolibre.v1+text",
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`ML API Error: ${response.status} - ${errorText}`);
+    }
+
+    const zpl = await response.text();
+
+    if (!zpl.trim().startsWith("^XA")) {
+      throw new Error("Resposta não é um código ZPL válido");
+    }
+
+    res.status(200).json({ zpl, shipment_id });
   } catch (error) {
-    console.error("[Erro ao baixar ZPL]", error.message);
+    console.error("[Erro ao gerar ZPL]", error.message);
     res.status(500).json({ error: error.message });
   }
 }
