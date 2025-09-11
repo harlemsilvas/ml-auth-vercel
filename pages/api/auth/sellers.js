@@ -1,5 +1,5 @@
 // pages/api/auth/sellers.js
-// 11-9-2025 correção de erro na vercel
+// Atualizado em: ${new Date().toISOString()} ← isso só para forçar mudança
 import { getAllSellers } from "../../../services/token-manager";
 
 export default async function handler(req, res) {
