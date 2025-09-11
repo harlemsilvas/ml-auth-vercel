@@ -1,7 +1,7 @@
 // pages/api/auth/login.js
 // atualização caminho mercadolivre.com.br
 export default function handler(req, res) {
-  const clientId = process.env.CLIENT_ID;
+  const clientId = process.env.MERCADO_LIVRE_APP_ID;
   const host = req.headers.host;
   const protocol = host.includes("localhost") ? "http" : "https";
   // const redirectUri = `${protocol}://${host}/api/auth/callback`;

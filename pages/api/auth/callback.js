@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     const params = new URLSearchParams();
     params.append("grant_type", "authorization_code");
     params.append("client_id", process.env.MERCADO_LIVRE_APP_ID);
-    params.append("client_secret", process.env.CLIENT_SECRET);
+    params.append("client_secret", process.env.MERCADO_LIVRE_SECRET_KEY);
     params.append("code", code);
     params.append("redirect_uri", redirectUri);
 
