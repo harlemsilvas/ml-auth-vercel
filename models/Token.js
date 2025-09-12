@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 const tokenSchema = new mongoose.Schema(
   {
     user_id: { type: Number, required: true, unique: true }, // Cada vendedor tem um único registro
+    nickname: { type: String },
     access_token: { type: String, required: true },
     refresh_token: { type: String, required: true },
     expires_in: { type: Number, default: 21600 },

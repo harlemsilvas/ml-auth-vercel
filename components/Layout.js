@@ -1,42 +1,42 @@
 // components/Layout.js
 import Link from "next/link";
 
-export default function Layout({ children }) {
+export default function Layout({ children, activePage }) {
   return (
     <div style={{ fontFamily: "Arial, sans-serif" }}>
       <nav
         style={{
           backgroundColor: "#0070ba",
           padding: "15px",
-          marginBottom: "20px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
         }}
       >
-        <div style={{ display: "flex", gap: "20px", fontSize: "16px" }}>
-          <Link href="/" style={linkStyle}>
+        <div style={{ fontSize: "18px", color: "white", fontWeight: "bold" }}>
+          ML Auth App
+        </div>
+        <div style={{ display: "flex", gap: "20px" }}>
+          <Link href="/" style={linkStyle(activePage === "dashboard")}>
             🏠 Início
           </Link>
-          <Link href="/zpl" style={linkStyle}>
-            🖨️ Etiquetas ZPL
-          </Link>
-          <Link href="/pedidos" style={linkStyle}>
-            📦 Pedidos
-          </Link>
-          <a
-            href="/api/auth/login"
-            style={{ ...linkStyle, marginLeft: "auto" }}
+          <Link
+            href="/admin/vendedores"
+            style={linkStyle(activePage === "admin")}
           >
-            ➕ Conectar Vendedor
-          </a>
+            👥 Vendedores
+          </Link>
         </div>
       </nav>
 
-      <main style={{ padding: "0 40px" }}>{children}</main>
+      <main style={{ padding: "20px 40px" }}>{children}</main>
     </div>
   );
 }
 
-const linkStyle = {
+const linkStyle = (active) => ({
   color: "white",
   textDecoration: "none",
   fontWeight: "bold",
-};
+  borderBottom: active ? "2px solid white" : "none",
+});
