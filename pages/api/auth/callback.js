@@ -11,6 +11,7 @@ export default async function handler(req, res) {
 
   try {
     const redirectUri = `https://${req.headers.host}/api/auth/callback`;
+    await saveTokenFromCode(code, redirectUri);
     const token = await exchangeCodeForToken(code, redirectUri);
 
     // Define cookies seguros
