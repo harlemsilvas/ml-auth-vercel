@@ -96,6 +96,25 @@ export default function PedidosPage() {
       ) : (
         <ul style={{ listStyle: "none", padding: 0 }}>
           {orders.map((order) => (
+            <li key={order.id}>
+              <strong>Pedido:</strong> {order.id} |<strong> Status:</strong>{" "}
+              {order.status} |<strong> Envio:</strong> {order.shipping_status} |
+              <strong> Comprador:</strong> {order.buyer}
+              {order.shipping?.id ? (
+                <a
+                  href={`/zpl?shipment_id=${order.shipping.id}`}
+                  target="_blank"
+                >
+                  🖨️ Imprimir Etiqueta
+                </a>
+              ) : (
+                <span style={{ color: "#999", marginLeft: "10px" }}>
+                  → Sem shipment_id disponível
+                </span>
+              )}
+            </li>
+          ))}
+          {/* {orders.map((order) => (
             <li
               key={order.id}
               style={{
@@ -142,7 +161,7 @@ export default function PedidosPage() {
                 </span>
               )}
             </li>
-          ))}
+          ))} */}
         </ul>
       )}
     </Layout>
