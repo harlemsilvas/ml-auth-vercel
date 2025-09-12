@@ -1,5 +1,6 @@
 // pages/api/orders/index.js
-import { fetchSellerOrders } from "../../../services/order-service";
+import { getValidToken } from "@/services/token-manager";
+import { fetchSellerOrders } from "@/services/order-service";
 
 export default async function handler(req, res) {
   const { seller_id } = req.query;
@@ -9,9 +10,14 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Usa o serviço modularizado
     const orders = await fetchSellerOrders(parseInt(seller_id));
     res.status(200).json({ orders });
   } catch (error) {
-    res.status(500).json({ error: error.message, orders: [] });
+    console.error("[API] Erro ao buscar pedidos:", error.message);
+    res.status(500).json({
+      error: "Falha ao buscar pedidos",
+      details: error.message,
+    });
   }
 }
